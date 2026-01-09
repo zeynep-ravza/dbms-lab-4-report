@@ -63,37 +63,38 @@ Ekran kaydı. 2-3 dk. açık kaynak V.T. kodu üzerinde konunun gösterimi. Vide
 
 ---
 
-# Açıklama 
-## Giriş
-Bu çalışmanın amacı, Veritabanı Yönetim Sistemleri dersinde teorik olarak işlediğimiz mimari kavramların, gerçek dünyada en yaygın kullanılan ilişkisel veritabanı olan **SQLite** kaynak kodundaki karşılıklarını incelemektir. 
+# Açıklama
+
+### Giriş
+Bu çalışmanın amacı, Veritabanı Yönetim Sistemleri dersinde teorik olarak işlediğimiz mimari kavramların, gerçek dünyada en yaygın kullanılan ilişkisel veritabanı olan **SQLite** kaynak kodundaki karşılıklarını incelemektir.
 
 Çalışma kapsamında **İşletim Sistemi perspektifi** (Disk I/O, Cache) ve **Veri Yapıları perspektifi** (B+ Tree, Algoritmalar) ele alınmış; ilgili mekanizmaların C dilindeki uygulamaları `src` dizini altındaki kaynak kodlar üzerinden analiz edilmiştir.
 
-
-## 1. Sistem Perspektifi: Blok Bazlı Disk Erişimi ve Sayfalama
+### 1. Sistem Perspektifi: Blok Bazlı Disk Erişimi ve Sayfalama
 Veritabanı sistemlerinin performansını belirleyen en kritik faktör Disk I/O maliyetidir. İşletim sistemleri ve diskler veriye byte veya satır bazında değil, bloklar halinde erişir. SQLite mimarisinde bu yapının **"Page"** kavramıyla karşılandığını `src/pager.c` dosyasında gözlemledik.
 
 * **Okuma İşlemi (Read):** `sqlite3PagerGet` fonksiyonunu incelediğimizde, veritabanının diskten veri isterken satır numarası değil, **`Pgno pgno` (Page Number)** parametresini kullandığını tespit ettik. Bu değişken, işletim sistemi seviyesindeki **Block ID** kavramının veritabanındaki karşılığıdır. Fonksiyonun dönüş değeri olan `DbPage`, verinin diskten 4KB’lık (varsayılan) bloklar halinde belleğe taşındığını kanıtlamaktadır.
 
 * **Yazma İşlemi (Write):** Benzer şekilde `sqlite3PagerWrite` fonksiyonu, parametre olarak **`PgHdr *pPg` (Page Header)** yapısını almaktadır. Bu durum, SQLite’ın yazma işlemlerini de satır bazlı değil, sayfa bütünü üzerinden yönettiğini ve "Block I/O" prensibine sadık kaldığını göstermektedir.
 
-## 2. Bellek Yönetimi: Buffer Pool ve LRU Algoritması
+### 2. Bellek Yönetimi: Buffer Pool ve LRU Algoritması
 Disk erişimi maliyetli (milisaniye mertebesinde) olduğu için veritabanları sık kullanılan sayfaları RAM’de tutmak zorundadır. Bu yapıya **Buffer Pool** adı verilir. SQLite’ın bu yönetimi `src/pcache1.c` (Page Cache) modülünde gerçekleştirdiğini analiz ettik.
 
 * **Önbellekleme (Caching):** `pcache1Fetch` fonksiyonu, istenen sayfanın önce RAM’de (Hash Map üzerinde) olup olmadığını kontrol eder. Bu fonksiyon, disk I/O maliyetini **O(1)** seviyesindeki bellek erişim hızına düşüren temel mekanizmadır.
 
 * **Sayfa Değiştirme (Page Replacement):** Bellek dolduğunda hangi sayfanın atılacağına karar vermek için **LRU (Least Recently Used)** algoritmasının kullanıldığını kod seviyesinde kanıtladık. `pcache1Unpin` fonksiyonu incelendiğinde, işi biten sayfaların `pLruNext` ve `pLruPrev` pointer’ları kullanılarak bir **Linked List** yapısına eklendiği görülmüştür. Bu liste, en az kullanılan sayfayı kuyruğun sonunda tutarak, tahliye gerektiğinde hangi sayfanın bellekten atılacağını belirler.
 
-## 3. Veri Yapıları Perspektifi: B+ Tree ve Arama Algoritmaları
+### 3. Veri Yapıları Perspektifi: B+ Tree ve Arama Algoritmaları
 Verilerin disk bloklarında tutulması tek başına yeterli değildir; bu verilere hızlı erişim için organize edilmeleri gerekir. SQLite, veriyi disk üzerinde **B+ Tree** veri yapısıyla tutar.
 
 * **Arama (Traversal):** `src/btree.c` dosyasındaki `sqlite3BtreeTableMoveto` fonksiyonu, bir kaydı bulmak için **`i64 intKey` (RowID)** parametresini kullanır. Fonksiyon, B+ Tree’nin kök düğümünden başlayarak, iç düğümler üzerinden yaprak düğümlere kadar iner. Bu kod analizi, teorik derslerde gördüğümüz "Ağaç üzerinde gezinme" (Tree Traversal) işleminin C dilindeki somut uygulamasıdır. Bu yapı sayesinde milyonlarca kayıt içeren tablolarda arama işlemi, tam tablo taraması yerine logaritmik karmaşıklıkla gerçekleştirilir.
 
-## 4. Veri Güvenliği: WAL (Write Ahead Log) ve Kalıcılık
+### 4. Veri Güvenliği: WAL (Write Ahead Log) ve Kalıcılık
 Veritabanlarının en önemli vaadi, sistem çökse bile verinin kaybolmamasıdır. SQLite’ın bunu sağlamak için **WAL** ilkesini kullandığını `src/wal.c` dosyasında tespit ettik.
 
 * **Loglama ve fsync:** `sqlite3WalFrames` fonksiyonu, değişen sayfaları doğrudan ana veritabanı dosyasına yazmak yerine önce WAL dosyasına yazar. Fonksiyonun parametreleri arasında yer alan **`sync_flags`**, verinin sadece işletim sistemi önbelleğine yazılmakla kalmayıp, **`fsync`** sistem çağrısıyla diske fiziksel olarak kazınmasını garanti eder. Bu mekanizma, "Log Disk vs Write" ayrımının kod tarafındaki en net kanıtıdır.
 
+---
 Yapılan incelemeler sonucunda; SQLite'ın bir "kara kutu" olmadığı, işletim sistemi prensipleri (Sayfalama, Cache, I/O) ve Veri Yapıları algoritmalarının (B-Tree, Linked List) hassas bir bileşimi olduğu gösterilmiştir.
 
 
