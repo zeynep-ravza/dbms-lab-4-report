@@ -46,13 +46,15 @@ DB diske yazarken:
 
 # Özet Tablo
 
-| Kavram      | Bellek          | Disk / DB      |
-| ----------- | --------------- | -------------- |
-| Adresleme   | Pointer         | Page + Offset  |
-| Hız         | O(1)            | Page IO        |
-| PK          | Yok             | Index anahtarı |
-| Veri yapısı | Array / Pointer | B+Tree         |
-| Cache       | CPU cache       | Buffer Pool    |
+| Kavram | Bellek (RAM) Karşılığı | Disk / DB Karşılığı (SQLite) |
+| :--- | :--- | :--- |
+| **Adresleme** | Pointer (`DbPage *`) | Block ID (`Pgno`) + Offset |
+| **Erişim Birimi** | Byte / Struct | Page (Sayfa/Blok) - 4KB |
+| **Hız / Maliyet** | O(1) / Nanosaniye | Page I/O / Milisaniye |
+| **Veri Yapısı** | Linked List (LRU Listesi) | B+ Tree (Nodes & Leaves) |
+| **Cache Yönetimi** | OS Page Cache | Buffer Pool (Özelleşmiş LRU) |
+| **Arama** | Hash Map (Cache Lookup) | `rowid` ile Ağaç Taraması |
+| **Kalıcılık** | Volatile (Uçucu) | WAL (Write Ahead Log) + fsync |
 
 ---
 
