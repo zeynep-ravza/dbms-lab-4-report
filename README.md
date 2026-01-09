@@ -94,7 +94,6 @@ Veritabanlarının en önemli vaadi, sistem çökse bile verinin kaybolmamasıd�
 
 * **Loglama ve fsync:** `sqlite3WalFrames` fonksiyonu, değişen sayfaları doğrudan ana veritabanı dosyasına yazmak yerine önce WAL dosyasına yazar. Fonksiyonun parametreleri arasında yer alan **`sync_flags`**, verinin sadece işletim sistemi önbelleğine yazılmakla kalmayıp, **`fsync`** sistem çağrısıyla diske fiziksel olarak kazınmasını garanti eder. Bu mekanizma, "Log Disk vs Write" ayrımının kod tarafındaki en net kanıtıdır.
 
----
 Yapılan incelemeler sonucunda; SQLite'ın bir "kara kutu" olmadığı, işletim sistemi prensipleri (Sayfalama, Cache, I/O) ve Veri Yapıları algoritmalarının (B-Tree, Linked List) hassas bir bileşimi olduğu gösterilmiştir.
 
 
