@@ -63,13 +63,12 @@ Ekran kaydı. 2-3 dk. açık kaynak V.T. kodu üzerinde konunun gösterimi. Vide
 
 ---
 
-# Açıklama (Ort. 600 kelime)
+# Açıklama 
 ## Giriş
 Bu çalışmanın amacı, Veritabanı Yönetim Sistemleri dersinde teorik olarak işlediğimiz mimari kavramların, gerçek dünyada en yaygın kullanılan ilişkisel veritabanı olan **SQLite** kaynak kodundaki karşılıklarını incelemektir. 
 
 Çalışma kapsamında **İşletim Sistemi perspektifi** (Disk I/O, Cache) ve **Veri Yapıları perspektifi** (B+ Tree, Algoritmalar) ele alınmış; ilgili mekanizmaların C dilindeki uygulamaları `src` dizini altındaki kaynak kodlar üzerinden analiz edilmiştir.
 
----
 
 ## 1. Sistem Perspektifi: Blok Bazlı Disk Erişimi ve Sayfalama
 Veritabanı sistemlerinin performansını belirleyen en kritik faktör Disk I/O maliyetidir. İşletim sistemleri ve diskler veriye byte veya satır bazında değil, bloklar halinde erişir. SQLite mimarisinde bu yapının **"Page"** kavramıyla karşılandığını `src/pager.c` dosyasında gözlemledik.
@@ -95,30 +94,28 @@ Veritabanlarının en önemli vaadi, sistem çökse bile verinin kaybolmamasıd�
 
 * **Loglama ve fsync:** `sqlite3WalFrames` fonksiyonu, değişen sayfaları doğrudan ana veritabanı dosyasına yazmak yerine önce WAL dosyasına yazar. Fonksiyonun parametreleri arasında yer alan **`sync_flags`**, verinin sadece işletim sistemi önbelleğine yazılmakla kalmayıp, **`fsync`** sistem çağrısıyla diske fiziksel olarak kazınmasını garanti eder. Bu mekanizma, "Log Disk vs Write" ayrımının kod tarafındaki en net kanıtıdır.
 
----
-
-## Sonuç
-
 Yapılan incelemeler sonucunda; SQLite'ın bir "kara kutu" olmadığı, işletim sistemi prensipleri (Sayfalama, Cache, I/O) ve Veri Yapıları algoritmalarının (B-Tree, Linked List) hassas bir bileşimi olduğu gösterilmiştir.
 
 
 
-## VT Üzerinde Gösterilen Kaynak Kodları
+## 🔗 VT Üzerinde İncelenen Kaynak Kodlar
 
-*1. Blok Bazlı Disk Erişimi (block_id + offset):* [pager.c - sqlite3PagerGet](https://github.com/sqlite/sqlite/blob/master/src/pager.c)
+Aşağıdaki bağlantılar, proje kapsamında analiz edilen SQLite (GitHub Mirror) kaynak kodlarını işaret etmektedir:
 
-*2. VT Sayfa Okuması (Satır/Sayfa):* [pager.c - sqlite3PagerWrite](https://github.com/sqlite/sqlite/blob/master/src/pager.c)
+* **1. Blok Bazlı Disk Erişimi :** [pager.c - sqlite3PagerGet Fonksiyonu](https://github.com/sqlite/sqlite/blob/master/src/pager.c)
 
-*3. Sık Kullanılan Sayfaları RAM'de Kopyalama (Caching):* [pcache1.c - pcache1Fetch](https://github.com/sqlite/sqlite/blob/master/src/pcache1.c)
+* **2. Sayfa Tabanlı Veri Yönetimi :** [pager.c - sqlite3PagerWrite Fonksiyonu](https://github.com/sqlite/sqlite/blob/master/src/pager.c)
 
-*4. LRU Algoritması:* [pcache1.c - struct PgHdr1 ve pcache1Unpin](https://github.com/sqlite/sqlite/blob/master/src/pcache1.c)
+* **3. Önbellekleme ve RAM Erişimi (Caching):** [pcache1.c - pcache1Fetch Fonksiyonu](https://github.com/sqlite/sqlite/blob/master/src/pcache1.c)
 
-*5. Disk I/O Minimizasyonu:* [pcache1.c - Buffer Pool Mekanizması](https://github.com/sqlite/sqlite/blob/master/src/pcache1.c)
+* **4. LRU Algoritması ve Sayfa Tahliyesi:** [pcache1.c - struct PgHdr1 ve pcache1Unpin](https://github.com/sqlite/sqlite/blob/master/src/pcache1.c)
 
-*6. B+ Tree Veri Yapısı Kullanımı:* [btree.c - sqlite3BtreeTableMoveto ve sqlite3BtreeIndexMoveto](https://github.com/sqlite/sqlite/blob/master/src/btree.c)
+* **5. Buffer Pool ile Disk I/O Optimizasyonu:** [pcache1.c - Buffer Pool Mekanizması](https://github.com/sqlite/sqlite/blob/master/src/pcache1.c)
 
-*7. WAL (Write Ahead Log) İlkesi:* [wal.c - sqlite3WalFrames](https://github.com/sqlite/sqlite/blob/master/src/wal.c)
+* **6. B+ Tree Arama ve Gezinme:** [btree.c - sqlite3BtreeTableMoveto](https://github.com/sqlite/sqlite/blob/master/src/btree.c)
 
-*8. fsync vs write Sistem Çağrıları Farkı:* [wal.c - sqlite3WalFrames (sync_flags parametresi)](https://github.com/sqlite/sqlite/blob/master/src/wal.c)
+* **7. Veri Güvenliği ve WAL İlkesi:** [wal.c - sqlite3WalFrames Fonksiyonu](https://github.com/sqlite/sqlite/blob/master/src/wal.c)
+
+* **8. Kalıcılık Garantisi (fsync vs write Ayrımı):** [wal.c - sqlite3WalFrames (sync_flags parametresi)](https://github.com/sqlite/sqlite/blob/master/src/wal.c)
 
 
