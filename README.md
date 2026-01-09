@@ -98,7 +98,7 @@ Yapılan incelemeler sonucunda; SQLite'ın bir "kara kutu" olmadığı, işletim
 
 
 
-## 🔗 VT Üzerinde İncelenen Kaynak Kodlar
+## VT Üzerinde İncelenen Kaynak Kodlar
 
 Aşağıdaki bağlantılar, proje kapsamında analiz edilen SQLite (GitHub Mirror) kaynak kodlarını işaret etmektedir:
 
