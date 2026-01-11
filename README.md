@@ -2,6 +2,8 @@
 
 Sistem Programlama ve Veri Yapıları bakış açısıyla veri tabanlarındaki performansı öne çıkaran hususlar nelerdir?
 
+CEVAP : Sistem Programlama ve Veri Yapıları perspektifinden veritabanı performansını öne çıkaran temel husus, donanım darboğazlarını optimize edilmiş yazılım mimarisiyle aşmaktır. Sistem programlama açısından performans, milisaniyeler süren maliyetli disk erişimini minimize etmek amacıyla verinin byte yerine blok bazlı okunması, Buffer Pool mekanizmasıyla sık kullanılan verilerin RAM'de önbelleklenmesi ve WAL ilkesiyle rastgele disk yazımlarının sıralı hale getirilmesiyle sağlanır. Veri yapıları perspektifinde ise performans, milyonlarca kayıt üzerindeki arama işlemlerinin B+ Tree yapısı sayesinde logaritmik (O(log N)) karmaşıklığa indirilmesi ve bellek yönetiminin Çift Yönlü Bağlı Listeler kullanan LRU algoritmalarıyla işlemciye yük bindirmeden (O(1) sürede) gerçekleştirilmesiyle öne çıkar.
+
 Aşağıda kutucuk (checkbox) ile gösterilen maddelerden en az birini seçtiğiniz açık kaynak kodlu bir VT kaynak kodları üzerinde göstererek açıklayınız. Açıklama bölümüne kısaca metninizi yazıp, kod üzerinde gösterim videonuzun linkini en altta belirtilen kutucuğa yerleştiriniz.
 
 - [X]  Seçtiğiniz konu/konuları bu şekilde işaretleyiniz. **!**
