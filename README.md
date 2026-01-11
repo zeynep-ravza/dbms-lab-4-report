@@ -61,7 +61,7 @@ DB diske yazarken:
 ---
 
 # Video [Linki](https://youtu.be/ygw76Ve77-8) 
-Rapor Videosu
+
 
 ---
 
